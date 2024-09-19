@@ -70,8 +70,9 @@ def process_jsonl(file_path):
             for subelement in ['style', 'xmp', 'iframe', 'noembed', 'noframes', 'noscript', 'script']:
                 contents_all = data.get(f"{subelement}_contents_all")
                 if contents_all:
-                    if check_html_entries(subelement, contents_all):
-                        print(f"ID: {row_num}, URL: {page}, Column: {subelement}, HTML entries: {script_html}")
+                    result = check_html_entries(subelement, contents_all)
+                    if result:
+                        print(f"ID: {row_num}, URL: {page}, Column: {subelement}, HTML entries: {result}")
 
 
 # Example usage
