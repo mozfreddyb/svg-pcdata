@@ -1,1 +1,2 @@
 {  "page": "https://TEST.EXAMPLE/",   "url": "https://TEST.EXAMPLE/",  "style_contents_all": ["<b>Hallo</b>"],  "row_num": "1365"}
+{  "page": "https://TEST-TWO.EXAMPLE/",   "url": "https://TEST-TWO.EXAMPLE/",  "style_contents_all": ["<animate>Hallo</animate>"],  "row_num": "1365"}

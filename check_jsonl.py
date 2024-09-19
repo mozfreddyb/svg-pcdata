@@ -1,38 +1,45 @@
 import json
 from html5lib.html5parser import HTMLParser
+from html5lib import treebuilders
 #from html5lib.treewalkers.dom import TreeWalker
 from xml.etree.ElementTree import Element
 
 # Function to check if an element has child elements
-def has_child_elements(html_content, context):
-    print(f"Trying has_child_element for", html_content)
+def has_child_elements(html_content, context, oddlyparsed):
     # Parse the HTML content into a DOM tree using html5lib
     try:
-        parser = HTMLParser()
+        parser = HTMLParser(tree=treebuilders.getTreeBuilder('dom'))
         fragment = parser.parseFragment(stream=html_content, container='body')
-        print(fragment, fragment)
-        breakpoint()
-        # Check if the root element has any child elements
-        for node in fragment:
-            if isinstance(node, Element):
-                # XXX this is where the check needs to be but isn't....
-                if node.tag == context:
-                    print("context was", context, "node is", node)
-                    return True
-        return False
+        # first node should be context (== math/svg)
+        if len(fragment.childNodes) == 1:
+            if fragment.firstChild.localName == context:
+                if fragment.firstChild.firstChild.localName == oddlyparsed:
+                    interesting_node = fragment.firstChild.firstChild
+                    result = f"Wow, we have an {oddlyparsed} elementin SVG/MATHML that has children: {[child.localName for child in interesting_node.childNodes]}"
+
+                    return [True, result]
+        # In this case, the content broke out of e.g. svg+style and went next to the svg.
+        # This would happen for `p` or `b` element as they dont exist in svg.
+        elif len(fragment.childNodes) == 2:
+            if fragment.firstChild.localName == context:
+                    result = "We found a case where content broke out"
+                    result += "The element that broke out was " + repr(fragment.childNodes[1].localName)
+                    return [True, result]
+        return [False, None]
 
     except Exception as e:
         print(f"Error parsing HTML: {e}")
-        return False
+        return [False, None]
 
 # Function to process each column (either script or xmp) and check all entries in the array
-def check_html_entries(context_element, column_data):
-    for outer in ["svg", "math"]:
+def check_html_entries(oddlyparsed, column_data):
+    for outer in ["svg"]: # XXX, "math"]:
         for html_content in column_data:
-            html_with_context = f"<{outer}><{context_element}>{html_content}</{context_element}></{outer}>"
-            if has_child_elements(html_with_context, outer):
-                return True
-    return False
+            html_with_context = f"<{outer}><{oddlyparsed}>{html_content}</{oddlyparsed}></{outer}>"
+            check_result = has_child_elements(html_with_context, outer, oddlyparsed)
+            if check_result[0] == True:
+                return check_result[1]
+    return None
 
 # Parse the JSONL file and process each line
 def process_jsonl(file_path):
