@@ -21,8 +21,14 @@ def has_child_elements(html_content, context, oddlyparsed):
                     # oddlyparsed is a string.
                     # this is the oddlyparsed but as a node (e.g., style,script,xmp,...)
                     interesting_node = fragment.firstChild.firstChild
-                    if (interesting_node.childNodes != 0) and any(map(lambda n: n.nodeType == ELEMENT_NODE, interesting_node.childNodes)):
-                        result = f"Wow, we have an {oddlyparsed} elementin SVG/MATHML that has children: {[child.localName for child in interesting_node.childNodes]}"
+                    # It's noteworthy if the xmp/script/style within SVG has another child that is an element (not a text node):
+                    result = ""
+                    match = False
+                    for child in interesting_node.childNodes:
+                        if child.nodeType == ELEMENT_NODE:
+                            result += f"Wow, we have an {oddlyparsed} element in SVG/MATHML that has children: {child.localName}\n"
+                            match = True
+                    if match:
                         return [True, result]
         # In this case, the content broke out of e.g. svg+style and went next to the svg.
         # This would happen for `p` or `b` element as they dont exist in svg.
