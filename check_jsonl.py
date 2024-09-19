@@ -4,6 +4,10 @@ from html5lib import treebuilders
 #from html5lib.treewalkers.dom import TreeWalker
 from xml.etree.ElementTree import Element
 
+# nodeTypes for DOM APIs
+ELEMENT_NODE = 1
+TEXT_NODE = 3
+
 # Function to check if an element has child elements
 def has_child_elements(html_content, context, oddlyparsed):
     # Parse the HTML content into a DOM tree using html5lib
@@ -14,10 +18,12 @@ def has_child_elements(html_content, context, oddlyparsed):
         if len(fragment.childNodes) == 1:
             if fragment.firstChild.localName == context:
                 if fragment.firstChild.firstChild.localName == oddlyparsed:
+                    # oddlyparsed is a string.
+                    # this is the oddlyparsed but as a node (e.g., style,script,xmp,...)
                     interesting_node = fragment.firstChild.firstChild
-                    result = f"Wow, we have an {oddlyparsed} elementin SVG/MATHML that has children: {[child.localName for child in interesting_node.childNodes]}"
-
-                    return [True, result]
+                    if (interesting_node.childNodes != 0) and any(map(lambda n: n.nodeType == ELEMENT_NODE, interesting_node.childNodes)):
+                        result = f"Wow, we have an {oddlyparsed} elementin SVG/MATHML that has children: {[child.localName for child in interesting_node.childNodes]}"
+                        return [True, result]
         # In this case, the content broke out of e.g. svg+style and went next to the svg.
         # This would happen for `p` or `b` element as they dont exist in svg.
         elif len(fragment.childNodes) == 2:
