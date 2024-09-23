@@ -32,7 +32,7 @@ def has_child_elements(html_content, context, oddlyparsed):
                         return [True, result]
         # In this case, the content broke out of e.g. svg+style and went next to the svg.
         # This would happen for `p` or `b` element as they dont exist in svg.
-        elif len(fragment.childNodes) == 2:
+        elif len(fragment.childNodes) >= 2:
             if fragment.firstChild.localName == context:
                     result = f"Breakout element <svg><{oddlyparsed}><{fragment.childNodes[1].localName}>"
                     return [True, result]
