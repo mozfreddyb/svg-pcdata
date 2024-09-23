@@ -26,7 +26,7 @@ def has_child_elements(html_content, context, oddlyparsed):
                     match = False
                     for child in interesting_node.childNodes:
                         if child.nodeType == ELEMENT_NODE:
-                            result += f"Wow, we have an {oddlyparsed} element in SVG/MATHML that has children: {child.localName}\n"
+                            result += f"Child element <svg><{oddlyparsed}><{child.localName}>"
                             match = True
                     if match:
                         return [True, result]
@@ -34,8 +34,7 @@ def has_child_elements(html_content, context, oddlyparsed):
         # This would happen for `p` or `b` element as they dont exist in svg.
         elif len(fragment.childNodes) == 2:
             if fragment.firstChild.localName == context:
-                    result = "We found a case where content broke out"
-                    result += "The element that broke out was " + repr(fragment.childNodes[1].localName)
+                    result = f"Breakout element <svg><{oddlyparsed}><{fragment.childNodes[1].localName}>"
                     return [True, result]
         return [False, None]
 
